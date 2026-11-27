@@ -1,0 +1,96 @@
+# Builds Polyrift on Linux, macOS and Windows for every push and pull request.
+# Pushing a tag that starts with "v" (for example v0.1.0) also publishes a GitHub Release
+# with a ready-to-run download for each platform.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-24.04,   name: linux-x64 }
+          - { os: macos-latest,   name: macos-arm64 }
+          - { os: windows-latest, name: windows-x64 }
+    defaults:
+      run:
+        working-directory: polyrift
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p dist/polyrift
+          if [ -f build/Release/polyrift.exe ]; then
+            cp build/Release/polyrift.exe dist/polyrift/
+          elif [ -f build/polyrift.exe ]; then
+            cp build/polyrift.exe dist/polyrift/
+          else
+            cp build/polyrift dist/polyrift/
+          fi
+          cp -r public README.md dist/polyrift/
+
+      - name: Self-test (simulates every game mode)
+        shell: bash
+        working-directory: polyrift/dist/polyrift
+        run: ./polyrift --selftest 1500
+
+      - name: Archive
+        shell: bash
+        working-directory: polyrift/dist
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a ../polyrift-${{ matrix.name }}.zip polyrift
+          else
+            tar czf ../polyrift-${{ matrix.name }}.tar.gz polyrift
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: polyrift-${{ matrix.name }}
+          path: |
+            polyrift/polyrift-${{ matrix.name }}.zip
+            polyrift/polyrift-${{ matrix.name }}.tar.gz
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        # If the release was already created on the website, just attach the downloads to it.
+        run: |
+          if gh release view "$TAG" --repo "$REPO" > /dev/null 2>&1; then
+            gh release upload "$TAG" artifacts/* --repo "$REPO" --clobber
+          else
+            gh release create "$TAG" artifacts/* --repo "$REPO" --title "$TAG" --generate-notes
+          fi
