@@ -721,7 +721,7 @@ void buildTankDefs() {
     {
         // Sees twice as far as the Gunner. Reloads slowly, and its shell destroys any tank it touches.
         TankDef& t = add(make("Destroyer Dominator", 0,
-            {GB(0, 1.55f, 0.6f).reload(4.5f).stats(0.52f, 200, 12).bsize(2).recoil(0).spread(0.01f).life(5.5f).leash(DOM_FAR)}));
+            {GB(0, 1.55f, 1.8f).reload(4.0f).stats(0.50f, 200, 12).bsize(3).recoil(0).spread(0.01f).life(5.5f).leash(DOM_FAR)}));
         t.hidden = true;
         t.shape = SH_DOM;
         npcBody(t, 2.0f, 6, 0.4f);
@@ -731,9 +731,9 @@ void buildTankDefs() {
     {
         TankDef& t = add(make("Gunner Dominator", 0,
             // Short-sighted: a storm of hard-hitting bullets that vanish at the edge of its small view.
-            {GB(0, 1.45f, 0.2f).ox(-0.24f).reload(0.3f).stats(1.6f, 1.5f, 2.2f).recoil(0).bsize(1.3f).leash(DOM_NEAR),
-             GB(0, 1.45f, 0.2f).ox(0.24f).delay(0.33f).reload(0.3f).stats(1.6f, 1.5f, 2.2f).recoil(0).bsize(1.3f).leash(DOM_NEAR),
-             GB(0, 1.6f, 0.2f).delay(0.66f).reload(0.3f).stats(1.6f, 1.5f, 2.2f).recoil(0).bsize(1.3f).leash(DOM_NEAR)}));
+            {GB(0, 1.45f, 0.2f).ox(-0.24f).reload(0.3f).stats(1.6f, 3.0f, 2.2f).recoil(0).bsize(1.3f).leash(DOM_NEAR),
+             GB(0, 1.45f, 0.2f).ox(0.24f).delay(0.33f).reload(0.3f).stats(1.6f, 3.0f, 2.2f).recoil(0).bsize(1.3f).leash(DOM_NEAR),
+             GB(0, 1.6f, 0.2f).delay(0.66f).reload(0.3f).stats(1.6f, 3.0f, 2.2f).recoil(0).bsize(1.3f).leash(DOM_NEAR)}));
         t.hidden = true;
         t.shape = SH_DOM;
         npcBody(t, 2.0f, 6, 0.4f);
