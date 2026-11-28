@@ -721,7 +721,7 @@ void buildTankDefs() {
     {
         // Sees twice as far as the Gunner. Reloads slowly, and its shell destroys any tank it touches.
         TankDef& t = add(make("Destroyer Dominator", 0,
-            {GB(0, 1.55f, 0.6f).reload(4.5f).stats(1.3f, 200, 12).recoil(0).spread(0.01f).life(2.2f).leash(DOM_FAR)}));
+            {GB(0, 1.55f, 0.6f).reload(4.5f).stats(0.52f, 200, 12).bsize(2).recoil(0).spread(0.01f).life(5.5f).leash(DOM_FAR)}));
         t.hidden = true;
         t.shape = SH_DOM;
         npcBody(t, 2.0f, 6, 0.4f);
